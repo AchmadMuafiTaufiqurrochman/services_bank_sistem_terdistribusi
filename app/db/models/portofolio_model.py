@@ -1,7 +1,4 @@
-# app/db/models/portofolio_model.py
-from sqlalchemy import (
-    Column, Integer, String, ForeignKey, Numeric, Date, Enum, Boolean, TIMESTAMP, func, CHAR, text
-)
+from sqlalchemy import (Column, Integer, String, ForeignKey, Numeric, Date, Enum, Boolean, TIMESTAMP, func, CHAR, text)
 from sqlalchemy.orm import relationship
 import enum
 from app.db.database import Base
@@ -21,7 +18,6 @@ class PortofolioAccount(Base):
     customer_id = Column(Integer, ForeignKey("customers.customer_id"), unique=True)
     currency_code = Column(CHAR(3), server_default="IDR")
     balance = Column(Numeric(15, 2), server_default="0.00")
-    # open_date = Column(Date, server_default=func.current_date())
     open_date = Column(Date, server_default=text("(CURRENT_DATE())"))
     status = Column(Enum(AccountStatus), server_default="Active")
     is_default = Column(Boolean, server_default="1")
@@ -29,6 +25,10 @@ class PortofolioAccount(Base):
     updated_at = Column(TIMESTAMP, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     # Relationships
-    customer = relationship("Customer", back_populates="portofolio")
+    customer = relationship(
+        "Customer",
+        back_populates="portofolio",
+        foreign_keys=[customer_id]
+    )
     transactions = relationship("Transaction", back_populates="source_account")
     mutations = relationship("Mutation", back_populates="account")
