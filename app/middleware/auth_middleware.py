@@ -1,3 +1,4 @@
+# app/middleware/auth_middleware.py
 from fastapi import Header, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select

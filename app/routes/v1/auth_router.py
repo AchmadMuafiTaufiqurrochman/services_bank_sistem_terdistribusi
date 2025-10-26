@@ -7,13 +7,19 @@ from app.db.models import Customer, Login, PortofolioAccount
 from app.schemas.auth_schema import RegisterRequest
 from passlib.context import CryptContext
 import random
+from app.middleware.auth_middleware import verify_auth
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__ident="2b",)
+
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__ident="2b",
+)
 
 @router.post("/register")
 async def register_user(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
-    # 1️⃣ Validasi duplikasi data
+    # 1️⃣ Cek duplikasi data (NIK, email, username)
     for model, field, value in [
         (Customer, Customer.NIK, data.nik),
         (Customer, Customer.email, data.email),
@@ -34,19 +40,22 @@ async def register_user(data: RegisterRequest, db: AsyncSession = Depends(get_db
         NIK=data.nik,
         phone_number=data.phone_number,
         email=data.email,
-        PIN=int(data.PIN),
-        id_portofolio=f"PRT-{random.randint(100000,999999)}"
+        PIN=int(data.PIN)
     )
     db.add(customer)
-    await db.flush()  # dapat customer_id
+    await db.flush()  # supaya customer_id langsung bisa dipakai
 
-    # 3️⃣ Sanitasi dan hashing password
-    password_clean = data.password.strip().encode("utf-8", errors="ignore")
+    # 3️⃣ Buat portofolio account yang terhubung ke customer
+    account = PortofolioAccount(
+        account_number=f"101{random.randint(1000000,9999999)}",
+        customer_id=customer.customer_id
+    )
+    db.add(account)
+    await db.flush()
 
-    # Normalisasi — hapus karakter non-ASCII tak terlihat
-    password_clean = password_clean.decode("utf-8", errors="ignore")
+    # 4️⃣ Hash password
+    password_clean = data.password.strip().encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")
 
-    # Cek panjang setelah dibersihkan
     if len(password_clean.encode("utf-8")) > 72:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -61,7 +70,7 @@ async def register_user(data: RegisterRequest, db: AsyncSession = Depends(get_db
             detail=f"Gagal memproses password: {str(e)}"
         )
 
-    # 4️⃣ Simpan ke tabel logins
+    # 5️⃣ Simpan ke tabel login
     login = Login(
         username=data.username,
         password_hash=hashed_password,
@@ -69,20 +78,46 @@ async def register_user(data: RegisterRequest, db: AsyncSession = Depends(get_db
     )
     db.add(login)
 
-    # 5️⃣ Simpan ke tabel portofolio_accounts
-    account = PortofolioAccount(
-        account_number=f"101{random.randint(1000000,9999999)}",
-        customer_id=customer.customer_id
-    )
-    db.add(account)
-
-    # 6️⃣ Commit dan kembalikan hasil
-    customer_id = customer.customer_id
-    account_number = account.account_number
+    # 6️⃣ Commit semua perubahan
     await db.commit()
 
+    # 7️⃣ Return hasil
     return {
         "message": "Registrasi berhasil!",
-        "customer_id": customer_id,
-        "account_number": account_number
+        # "username_customer": data.username,
+        # "password_customer": data.password,
+        # "account_number": account.account_number
+    }
+
+@router.post("/login")
+async def login_user(user: Login = Depends(verify_auth), db: AsyncSession = Depends(get_db)):
+    """
+    Endpoint login menggunakan middleware autentikasi.
+    User mengirimkan header:
+    - Authorization-Username
+    - Authorization-Password
+    """
+    # Ambil data customer terkait user login
+    result = await db.execute(select(Customer).where(Customer.customer_id == user.customer_id))
+    customer = result.scalar_one_or_none()
+
+    if not customer:
+        raise HTTPException(status_code=404, detail="Data nasabah tidak ditemukan")
+
+    # Dapat juga kembalikan data portofolio jika ingin
+    result = await db.execute(select(PortofolioAccount).where(PortofolioAccount.customer_id == customer.customer_id))
+    portofolio = result.scalar_one_or_none()
+
+    return {
+        "message": "Login berhasil!",
+        "username": user.username,
+        "customer": {
+            "customer_id": customer.customer_id,
+            "full_name": customer.full_name,
+            "email": customer.email,
+        },
+        "account": {
+            "account_number": portofolio.account_number if portofolio else None,
+            "status": portofolio.status.value if portofolio else None
+        }
     }
