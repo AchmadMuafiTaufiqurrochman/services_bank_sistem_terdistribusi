@@ -38,20 +38,30 @@ async def register_user(data: RegisterRequest, db: AsyncSession = Depends(get_db
         id_portofolio=f"PRT-{random.randint(100000,999999)}"
     )
     db.add(customer)
-    await db.flush()  # untuk dapat customer_id
+    await db.flush()  # dapat customer_id
 
-    password_clean = data.password.strip()
+    # 3️⃣ Sanitasi dan hashing password
+    password_clean = data.password.strip().encode("utf-8", errors="ignore")
 
+    # Normalisasi — hapus karakter non-ASCII tak terlihat
+    password_clean = password_clean.decode("utf-8", errors="ignore")
+
+    # Cek panjang setelah dibersihkan
     if len(password_clean.encode("utf-8")) > 72:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password terlalu panjang, maksimal 72 karakter.")
-    print(f"[DEBUG] Raw password repr: {repr(data.password)}")
-    print(f"[DEBUG] Clean password repr: {repr(password_clean)}")
-    print(f"[DEBUG] Byte length: {len(password_clean.encode('utf-8'))}")
+            detail="Password terlalu panjang, maksimal 72 karakter."
+        )
 
-    # 3️⃣ Simpan ke tabel logins
-    hashed_password = pwd_context.hash(password_clean)
+    try:
+        hashed_password = pwd_context.hash(password_clean)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Gagal memproses password: {str(e)}"
+        )
+
+    # 4️⃣ Simpan ke tabel logins
     login = Login(
         username=data.username,
         password_hash=hashed_password,
@@ -59,18 +69,20 @@ async def register_user(data: RegisterRequest, db: AsyncSession = Depends(get_db
     )
     db.add(login)
 
-    # 4️⃣ Simpan ke tabel portofolio_accounts
+    # 5️⃣ Simpan ke tabel portofolio_accounts
     account = PortofolioAccount(
         account_number=f"101{random.randint(1000000,9999999)}",
         customer_id=customer.customer_id
     )
     db.add(account)
 
-    # 5️⃣ Commit semua perubahan
+    # 6️⃣ Commit dan kembalikan hasil
+    customer_id = customer.customer_id
+    account_number = account.account_number
     await db.commit()
 
     return {
         "message": "Registrasi berhasil!",
-        "customer_id": customer.customer_id,
-        "account_number": account.account_number
+        "customer_id": customer_id,
+        "account_number": account_number
     }
