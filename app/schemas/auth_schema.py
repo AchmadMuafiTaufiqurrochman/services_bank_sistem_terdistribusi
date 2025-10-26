@@ -1,7 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field, constr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import date
 
-PasswordStr = constr(max_length=72)
 class RegisterRequest(BaseModel):
     full_name: str = Field(..., example="Budi Santoso")
     birth_date: date
@@ -10,5 +9,5 @@ class RegisterRequest(BaseModel):
     phone_number: str
     email: EmailStr
     username: str
-    password: constr(max_length=72)
-    PIN: constr(min_length=6, max_length=6)
+    password: str
+    PIN: str
