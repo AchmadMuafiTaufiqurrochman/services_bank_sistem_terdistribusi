@@ -1,3 +1,4 @@
+# app/db/models/customer_model.py
 from sqlalchemy import Column, Integer, String, Date, Text, TIMESTAMP, func, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.database import Base

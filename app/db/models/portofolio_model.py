@@ -1,3 +1,4 @@
+# app/db/models/portofolio_model.py
 from sqlalchemy import (Column, Integer, String, ForeignKey, Numeric, Date, Enum, Boolean, TIMESTAMP, func, CHAR, text)
 from sqlalchemy.orm import relationship
 import enum
