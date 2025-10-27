@@ -9,6 +9,5 @@ class Settings:
     DB_PASSWORD: str = os.getenv("DB_PASSWORD")
     DB_NAME: str = os.getenv("DB_NAME")
     DB_PORT: int = os.getenv("DB_PORT")
-    API_KEY_MID: str = os.getenv("API_KEY_MID")
 
 settings = Settings()
