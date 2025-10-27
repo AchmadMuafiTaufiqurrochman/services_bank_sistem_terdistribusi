@@ -73,7 +73,6 @@ async def login_user(user, db):
         "username": user.username,
         "password": user.password_plain,
         "customer": {
-            "customer_id": customer.customer_id,
             "full_name": customer.full_name,
             "email": customer.email,
         },
