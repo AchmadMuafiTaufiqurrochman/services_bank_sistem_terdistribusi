@@ -1,3 +1,4 @@
+# app/schemas/auth_schema.py
 from pydantic import BaseModel, EmailStr, Field
 from datetime import date
 

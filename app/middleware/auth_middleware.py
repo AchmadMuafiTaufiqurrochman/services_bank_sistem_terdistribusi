@@ -30,6 +30,7 @@ async def verify_auth(
     # Verifikasi password (hash bcrypt)
     if not pwd_context.verify(authorization_password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid password")
-
+    
+    user.password_plain = authorization_password
     # Jika lolos, kembalikan data pengguna (bisa diakses di route)
     return user

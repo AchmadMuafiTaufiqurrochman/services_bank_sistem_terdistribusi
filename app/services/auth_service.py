@@ -71,6 +71,7 @@ async def login_user(user, db):
     return {
         "message": "Login berhasil!",
         "username": user.username,
+        "password": user.password_plain,
         "customer": {
             "customer_id": customer.customer_id,
             "full_name": customer.full_name,
