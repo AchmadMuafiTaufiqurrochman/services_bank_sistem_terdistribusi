@@ -4,8 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.middleware.auth_middleware import verify_auth
 from app.services.accounts_service import AccountsService
-from app.schemas.accounts_schema import AccountQuery  # ✅ import schema baru
-
+from app.schemas.accounts_schema import AccountQuery
 
 router = APIRouter(prefix="/accounts", tags=["Accounts"])
 
