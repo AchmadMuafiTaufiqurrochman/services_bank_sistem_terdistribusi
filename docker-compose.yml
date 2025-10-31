@@ -1,4 +1,3 @@
-
 services:
   db_service:
     image: mysql:8.3
@@ -31,22 +30,21 @@ services:
     depends_on:
       db_service:
         condition: service_healthy
-
     ports:
       - "${APP_PORT}:${APP_PORT}"
     volumes:
       - .:/app
     command: >
-     bash -c "
-      echo '⏳ Checking MySQL readiness...' &&
-      until mysqladmin ping -h ${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --silent; do
-        echo '🕐 Waiting for MySQL...';
-        sleep 4;
-      done &&
-      echo '✅ MySQL is ready. Running migrations...' &&
-      alembic upgrade head &&
-      uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT} --reload
-    "
-      
+      bash -c "
+        echo '⏳ Checking MySQL readiness...' &&
+        until mysqladmin ping -h ${DB_HOST} -u${DB_USER} -p${DB_PASSWORD} --silent; do
+          echo '🕐 Waiting for MySQL...';
+          sleep 4;
+        done &&
+        echo '✅ MySQL is ready. Running migrations...' &&
+        alembic upgrade head &&
+        uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT} --reload
+      "
+
 volumes:
   mysql_data:
