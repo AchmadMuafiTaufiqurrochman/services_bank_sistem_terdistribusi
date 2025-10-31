@@ -1,8 +1,8 @@
 
 services:
-  db:
+  db_service:
     image: mysql:8.3
-    container_name: bank_mysql
+    container_name: service_bank_mysql
     restart: always
     env_file:
       - .env
