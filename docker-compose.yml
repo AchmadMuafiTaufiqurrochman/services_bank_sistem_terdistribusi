@@ -11,10 +11,14 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - "3305:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-    command:
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   app:
     build: .
@@ -23,7 +27,7 @@ services:
     env_file:
       - .env
     depends_on:
-      db_service:
+      - db_service
     ports:
       - "${APP_PORT}:${APP_PORT}"
     volumes:
