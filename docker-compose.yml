@@ -16,6 +16,11 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   app:
     build: .
@@ -24,14 +29,19 @@ services:
     env_file:
       - .env
     depends_on:
-      - db_service
+      db_service:
+        condition: service_healthy
+
     ports:
       - "${APP_PORT}:${APP_PORT}"
     volumes:
       - .:/app
     command: >
-      bash -c "alembic upgrade head &&
-               uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT} --reload"
-
+      bash -c "
+        echo '⏳ Waiting for database to be ready...' &&
+        alembic upgrade head &&
+        uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT} --reload
+      "
+      
 volumes:
   mysql_data:
