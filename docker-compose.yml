@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    # Load env vars from project .env via variable substitution and env_file
+    env_file:
+      - .env
+    environment:
+      # Root password (can be set via MYSQL_ROOT_PASSWORD in .env)
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      # Map the project's DB_NAME/DB_USER/DB_PASSWORD into MySQL's expected vars
+      MYSQL_DATABASE: ${DB_NAME:-services}
+      MYSQL_USER: ${DB_USER:-user_services}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-"Serv!ces@123"}
+    ports:
+      - "${DB_PORT:-3306}:${DB_PORT:-3306}"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    # load runtime env vars from .env into the container
+    env_file:
+      - .env
+    environment:
+      # pass-through common DB variables (useful inside container)
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app:cached
+    command: /app/scripts/docker-entrypoint.sh
+
+volumes:
+  db_data:
