@@ -142,7 +142,7 @@ Ada skrip sederhana untuk menguji koneksi database: `test/test_connection.py`.
 Jalankan dari PowerShell (pastikan environment aktif dan `.env` sudah terisi):
 
 ```powershell
-python .\test\test_connection.py
+python.exe -m test.test_connection
 ```
 
 Output akan menampilkan apakah koneksi berhasil atau gagal.

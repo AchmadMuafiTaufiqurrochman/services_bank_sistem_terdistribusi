@@ -1,15 +1,19 @@
 # app/services/auth_service.py
 from fastapi import HTTPException, status
+from fastapi.encoders import jsonable_encoder
 from app.db.models import Customer, Login, PortofolioAccount
 from app.repositories.auth_repository import AuthRepository
 from passlib.context import CryptContext
 import random
 from sqlalchemy.future import select
+from app.core.config import settings
+from app.core.request_middleware import send_to_middleware
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__ident="2b")
 
 async def register_user(db, data):
+
     repo = AuthRepository(db)
 
     # 1️⃣ Cek duplikasi
@@ -22,36 +26,60 @@ async def register_user(db, data):
         if result.scalar_one_or_none():
             raise HTTPException(status_code=400, detail=f"{field.key.capitalize()} sudah digunakan!")
 
-    # 2️⃣ Simpan customer
-    customer = Customer(
-        full_name=data.full_name,
-        birth_date=data.birth_date,
-        address=data.address,
-        NIK=data.nik,
-        phone_number=data.phone_number,
-        email=data.email,
-        PIN=int(data.PIN)
-    )
-    await repo.create_customer(customer)
+    try:
+        # 2️⃣ Simpan customer
+        customer = Customer(
+            full_name=data.full_name,
+            birth_date=data.birth_date,
+            address=data.address,
+            NIK=data.nik,
+            phone_number=data.phone_number,
+            email=data.email,
+            PIN=int(data.PIN)
+        )
+        await repo.create_customer(customer)
 
-    # 3️⃣ Buat portofolio account
-    account = PortofolioAccount(
-        account_number=f"101{random.randint(1000000,9999999)}",
-        customer_id=customer.customer_id
-    )
-    await repo.create_portofolio(account)
+        # 3️⃣ Buat portofolio account
+        account = PortofolioAccount(
+            account_number=f"101{random.randint(1000000,9999999)}",
+            customer_id=customer.customer_id
+        )
+        await repo.create_portofolio(account)
 
-    # 4️⃣ Hash password
-    password_clean = data.password.strip().encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")
-    if len(password_clean.encode("utf-8")) > 72:
-        raise HTTPException(status_code=400, detail="Password terlalu panjang, maksimal 72 karakter.")
-    hashed_password = pwd_context.hash(password_clean)
+        # 4️⃣ Hash password
+        password_clean = data.password.strip().encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")
+        if len(password_clean.encode("utf-8")) > 72:
+            raise HTTPException(status_code=400, detail="Password terlalu panjang, maksimal 72 karakter.")
+        hashed_password = pwd_context.hash(password_clean)
 
-    # 5️⃣ Simpan login
-    login = Login(username=data.username, password_hash=hashed_password, customer_id=customer.customer_id)
-    await repo.create_login(login)
+        # 5️⃣ Simpan login
+        login = Login(username=data.username, password_hash=hashed_password, customer_id=customer.customer_id)
+        await repo.create_login(login)
 
-    await db.commit()
+        payload = {
+            "full_name": customer.full_name,
+            "birth_date": customer.birth_date.isoformat() if customer.birth_date else None,
+            "address": customer.address,
+            "nik": customer.NIK,
+            "phone_number": customer.phone_number,
+            "email": customer.email,
+            "username": login.username,
+            "password": hashed_password,
+            "account_number": account.account_number,
+            "customer_id": customer.customer_id,
+            "portofolio_id": account.portofolio_id,
+        }
+
+        # await send_to_middleware(payload, path="/api/v1/transactions/receive")
+
+        await db.commit()
+    except HTTPException:
+        await db.rollback()
+        raise
+    except Exception:
+        await db.rollback()
+        raise
+
     return {"message": "Registrasi berhasil!"}
 
 async def login_user(user, db):
@@ -81,3 +109,5 @@ async def login_user(user, db):
             "status": portofolio.status.value if portofolio else None
         }
     }
+
+

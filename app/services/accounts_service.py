@@ -10,8 +10,7 @@ class AccountsService:
     async def get_balance(self, user, account_number: str | None = None):
         if account_number:
             account = await self.repo.get_account_by_number(account_number)
-        else:
-            account = await self.repo.get_account_by_customer_id(user.customer_id)
+
 
         if not account:
             raise HTTPException(
