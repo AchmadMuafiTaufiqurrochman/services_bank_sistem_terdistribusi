@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 import random
 from sqlalchemy.future import select
 from app.core.config import settings
-from app.core.request_middleware import send_to_middleware
+from app.utils.request_middleware import send_to_middleware
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__ident="2b")
