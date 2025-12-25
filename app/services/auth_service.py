@@ -63,14 +63,12 @@ async def register_user(db, data):
             "nik": customer.NIK,
             "phone_number": customer.phone_number,
             "email": customer.email,
-            "username": login.username,
-            "password": hashed_password,
             "account_number": account.account_number,
             "customer_id": customer.customer_id,
             "portofolio_id": account.portofolio_id,
         }
 
-        # await send_to_middleware(payload, path="/api/v1/transactions/receive")
+        await send_to_middleware(payload, path="/api/v1/portofolio/create")
 
         await db.commit()
     except HTTPException:

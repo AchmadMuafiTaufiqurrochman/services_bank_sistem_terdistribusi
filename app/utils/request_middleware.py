@@ -9,11 +9,10 @@ async def send_to_middleware(
 	payload: dict,
 	*,
 	path: str | None = None,
-	endpoint: str | None = None,
 	timeout: float = 5.0,
 ) -> None:
 	"""Kirim payload ke middleware dengan header secret key dan dukungan path dinamis."""
-	base_url = endpoint or settings.ENDPOINT_API_MIDDLEWARE
+	base_url = settings.ENDPOINT_API_MIDDLEWARE
 	if not base_url:
 		raise HTTPException(
 			status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

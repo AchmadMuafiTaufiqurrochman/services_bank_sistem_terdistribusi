@@ -21,7 +21,6 @@ class PortofolioAccount(Base):
     balance = Column(Numeric(15, 2), server_default="0.00")
     open_date = Column(Date, server_default=text("(CURRENT_DATE())"))
     status = Column(Enum(AccountStatus), server_default="Active")
-    is_default = Column(Boolean, server_default="1")
     created_at = Column(TIMESTAMP, server_default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
