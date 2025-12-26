@@ -22,3 +22,9 @@ class AccountsRepository:
             .where(PortofolioAccount.customer_id == customer_id)
         )
         return result.scalar_one_or_none()
+
+    async def update_account(self, account: PortofolioAccount):
+        self.db.add(account)
+        await self.db.commit()
+        await self.db.refresh(account)
+        return account

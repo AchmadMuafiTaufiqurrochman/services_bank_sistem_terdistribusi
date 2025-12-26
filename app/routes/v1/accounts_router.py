@@ -5,6 +5,8 @@ from app.db.database import get_db
 from app.middleware.auth_middleware import verify_auth
 from app.services.accounts_service import AccountsService
 from app.schemas.accounts_schema import AccountQuery
+from app.schemas.add_balance_schema import AddBalanceSchema
+
 
 router = APIRouter(prefix="/accounts", tags=["Accounts"])
 
@@ -24,3 +26,12 @@ async def get_customer_detail(
 ):
     service = AccountsService(db)
     return await service.get_customer_detail(user)
+
+@router.post("/balance/deposit")
+async def add_balance(
+    payload: AddBalanceSchema,
+    db: AsyncSession = Depends(get_db),
+    user = Depends(verify_auth)
+):
+    service = AccountsService(db)
+    return await service.add_balance(user, payload.amount)

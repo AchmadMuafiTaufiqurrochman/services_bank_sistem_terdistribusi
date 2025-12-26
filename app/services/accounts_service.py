@@ -1,8 +1,9 @@
 # app/services/accounts_service.py
 from datetime import datetime
+from decimal import Decimal
 from fastapi import HTTPException, status
 from app.repositories.accounts_repository import AccountsRepository
-
+from app.utils.request_middleware import send_to_middleware
 class AccountsService:
     def __init__(self, db):
         self.repo = AccountsRepository(db)
@@ -54,5 +55,35 @@ class AccountsService:
                 "balance": float(account.balance),
                 "status": account.status.value if account.status else "Unknown",
                 "last_updated": account.updated_at.isoformat() if account.updated_at else datetime.utcnow().isoformat()
+            }
+        }
+    
+    async def add_balance(self, user, amount: float):
+        print(f"DEBUG: User object: {user}")
+        print(f"DEBUG: Customer ID: {user.customer_id}")
+        account = await self.repo.get_account_by_customer_id(user.customer_id)
+        if not account:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Rekening tidak ditemukan"
+            )
+
+        payload = {
+            "account_number": account.account_number,
+            "amount": amount
+        }
+
+        await send_to_middleware(payload, path="/api/v1/portofolio/balance/deposit")
+
+        account.balance += Decimal(amount)
+        await self.repo.update_account(account)
+
+        return {
+            "status": "success",
+            "message": "Saldo berhasil ditambahkan",
+            "data": {
+                "account_number": account.account_number,
+                "balance": account.balance,
+                "currency_code": account.currency_code
             }
         }
