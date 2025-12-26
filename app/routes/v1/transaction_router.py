@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
-from app.auth.dependencies import verify_auth
+from app.middleware.auth_middleware import verify_auth
 from app.schemas.overbook_schema import OverbookSchema
 from app.services.overbook_service import OverbookService
 
