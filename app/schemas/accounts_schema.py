@@ -1,5 +1,5 @@
 # app/schemas/accounts_schema.py
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict,Field
 from fastapi import Query
 
 class AccountQuery(BaseModel):

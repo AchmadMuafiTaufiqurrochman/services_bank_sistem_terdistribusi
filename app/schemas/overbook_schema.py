@@ -12,5 +12,4 @@ class OverbookSchema(BaseModel):
     amount: float
     currency_code: str | None = "IDR"
     description: str | None = None
-    transaction_date: date | None = None
-
+    PIN : int
