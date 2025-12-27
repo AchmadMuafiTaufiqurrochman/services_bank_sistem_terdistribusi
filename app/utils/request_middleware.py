@@ -9,7 +9,7 @@ async def send_to_middleware(
 	payload: dict,
 	*,
 	path: str | None = None,
-	timeout: float = 5.0,
+	timeout: float = 10.0,
 ) -> None:
 	"""Kirim payload ke middleware dengan header secret key dan dukungan path dinamis."""
 	base_url = settings.ENDPOINT_API_MIDDLEWARE
