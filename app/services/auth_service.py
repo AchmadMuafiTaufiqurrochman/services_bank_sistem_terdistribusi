@@ -68,7 +68,7 @@ async def register_user(db, data):
             "portofolio_id": account.portofolio_id,
         }
 
-        await send_to_middleware(payload, path="/api/v1/portofolio/create")
+        await send_to_middleware(payload, path="/api/v1/accounts/create")
 
         await db.commit()
     except HTTPException:

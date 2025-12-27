@@ -1,18 +1,18 @@
 from fastapi import HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from app.db.models import Transaction
-from app.repositories.overbook_repository import OverbookRepository
 from app.utils.request_middleware import send_to_middleware
 from datetime import datetime
+from app.repositories.transaction_repository import TransactionRepository
 
 class OverbookService:
     def __init__(self, db):
         self.db = db
-        self.overbook_repository = OverbookRepository(db)
+        self.transaction_repository = TransactionRepository(db)
 
     async def process_overbook_transaction(self, overbook_data, user):
         # 1. Validasi: Cek apakah account number milik customer yang login
-        account = await self.overbook_repository.get_account_by_number_and_customer(
+        account = await self.transaction_repository.get_account_by_number_and_customer(
             overbook_data.source_account_number, 
             user.customer_id)
         
@@ -23,7 +23,7 @@ class OverbookService:
             )
 
         # 2. Validasi PIN
-        customer_pin = await self.overbook_repository.get_customer_pin(user.customer_id)
+        customer_pin = await self.transaction_repository.get_customer_pin(user.customer_id)
         if customer_pin != overbook_data.PIN:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -45,18 +45,18 @@ class OverbookService:
 
         try:
             # Simpan sementara (Flush) untuk mendapatkan transaction_id
-            await self.overbook_repository.create_overbook_transaction(transaction)
+            await self.transaction_repository.create_transaction(transaction)
             
             # 4. Kirim ke Middleware (Core) dengan ID yang sudah terbentuk
             payload = jsonable_encoder(overbook_data)
             payload["transaction_id"] = transaction.transaction_id  # Sisipkan ID untuk konsistensi
             
             # 5. Kirim ke middleware
-            await send_to_middleware(payload, path="/api/v1/transaction/overbook")
+            await send_to_middleware(payload, path="/api/v1/transactions/execute")
 
             # Update balances
-            await self.overbook_repository.update_balance(overbook_data.source_account_number, -overbook_data.amount)
-            await self.overbook_repository.update_balance(overbook_data.target_account_number, overbook_data.amount)
+            await self.transaction_repository.update_balance(overbook_data.source_account_number, -overbook_data.amount)
+            await self.transaction_repository.update_balance(overbook_data.target_account_number, overbook_data.amount)
             
             # 6. Jika Core sukses, Commit permanen
             await self.db.commit()

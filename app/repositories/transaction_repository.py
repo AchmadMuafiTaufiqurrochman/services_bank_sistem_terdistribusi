@@ -3,11 +3,11 @@ from sqlalchemy import update
 from app.db.models import Transaction, PortofolioAccount, Customer
 from decimal import Decimal
 
-class OverbookRepository:
+class TransactionRepository:
     def __init__(self, db):
         self.db = db
         
-    async def create_overbook_transaction(self, transaction: Transaction):
+    async def create_transaction(self, transaction: Transaction):
         self.db.add(transaction)
         await self.db.flush()
         return transaction
