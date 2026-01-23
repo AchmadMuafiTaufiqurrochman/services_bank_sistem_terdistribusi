@@ -38,4 +38,5 @@ fi
 echo "[entrypoint] starting migrations..."
 alembic upgrade head
 echo "[entrypoint] starting uvicorn"
-exec uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT:-8000}
+# Tambahkan --proxy-headers dan --forwarded-allow-ips agar uvicorn percaya header dari Nginx
+exec uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT:-8000} --proxy-headers --forwarded-allow-ips '*'
