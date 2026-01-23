@@ -9,13 +9,13 @@ services:
       - .env
     environment:
       # Root password (can be set via MYSQL_ROOT_PASSWORD in .env)
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       # Map the project's DB_NAME/DB_USER/DB_PASSWORD into MySQL's expected vars
-      MYSQL_DATABASE: ${DB_NAME:-services}
-      MYSQL_USER: ${DB_USER:-user_services}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-"Serv!ces@123"}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${DB_PORT:-3306}:${DB_PORT:-3306}"
+      - "${DB_PORT_EXTERNAL:-3303}:${DB_PORT:-3306}"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -25,7 +25,10 @@ services:
       retries: 5
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        APP_PORT: ${APP_PORT:-8000}
     restart: unless-stopped
     # load runtime env vars from .env into the container
     env_file:
@@ -38,13 +41,20 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
     ports:
-      - "8000:8000"
+      - "${APP_PORT:-8000}:${APP_PORT:-8000}"
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - .:/app:cached
     command: /app/scripts/docker-entrypoint.sh
+    networks:
+      - default
+      - minibank-network
 
 volumes:
   db_data:
+
+networks:
+  minibank-network:
+    external: true

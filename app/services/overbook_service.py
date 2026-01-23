@@ -1,9 +1,11 @@
 from fastapi import HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from app.db.models import Transaction
+from app.db.models.transaction_model import TransactionType, TransactionBank
 from app.utils.request_middleware import send_to_middleware
 from datetime import datetime
 from app.repositories.transaction_repository import TransactionRepository
+from app.middleware.pin_middleware import validate_pin
 
 class OverbookService:
     def __init__(self, db):
@@ -11,10 +13,10 @@ class OverbookService:
         self.transaction_repository = TransactionRepository(db)
 
     async def process_overbook_transaction(self, overbook_data, user):
+       
         # 1. Validasi: Cek apakah account number milik customer yang login
-        account = await self.transaction_repository.get_account_by_number_and_customer(
-            overbook_data.source_account_number, 
-            user.customer_id)
+        account = await self.transaction_repository.get_account_by_customer_id(user.customer_id)
+        
         
         if not account:
             raise HTTPException(
@@ -23,22 +25,17 @@ class OverbookService:
             )
 
         # 2. Validasi PIN
-        customer_pin = await self.transaction_repository.get_customer_pin(user.customer_id)
-        if customer_pin != overbook_data.PIN:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="PIN salah."
-            )
+        await validate_pin(overbook_data.PIN, user.customer_id, self.db)
 
         # 3. Buat Object Transaction & Flush (Dapatkan ID)
         transaction = Transaction(
-            transaction_type=overbook_data.transaction_type,
-            transaction_bank=overbook_data.transaction_bank,
+            transaction_type=TransactionType.TrfOvrbok,
+            transaction_bank=TransactionBank.Internal,
             bank_reference=overbook_data.bank_reference,
-            source_account_number=overbook_data.source_account_number,
+            source_account_number=account.account_number,
             target_account_number=overbook_data.target_account_number,
             amount=overbook_data.amount,
-            currency_code=overbook_data.currency_code,
+            currency_code="IDR",
             description=overbook_data.description,
             transaction_date=datetime.now()
         )
@@ -49,13 +46,18 @@ class OverbookService:
             
             # 4. Kirim ke Middleware (Core) dengan ID yang sudah terbentuk
             payload = jsonable_encoder(overbook_data)
-            payload["transaction_id"] = transaction.transaction_id  # Sisipkan ID untuk konsistensi
+            payload.update({
+                "transaction_id": transaction.transaction_id,
+                "transaction_type": transaction.transaction_type.value,
+                "transaction_bank": transaction.transaction_bank.value,
+                "source_account_number": account.account_number
+            })
             
             # 5. Kirim ke middleware
-            await send_to_middleware(payload, path="/api/v1/transactions/execute")
+            await send_to_middleware(payload, path="/api/v1/transaction/overbook")
 
             # Update balances
-            await self.transaction_repository.update_balance(overbook_data.source_account_number, -overbook_data.amount)
+            await self.transaction_repository.update_balance(account.account_number, -overbook_data.amount)
             await self.transaction_repository.update_balance(overbook_data.target_account_number, overbook_data.amount)
             
             # 6. Jika Core sukses, Commit permanen
@@ -69,6 +71,7 @@ class OverbookService:
             raise HTTPException(status_code=500, detail=f"Transaksi gagal: {str(e)}")
             
         return {
+            "status": "success",
             "message": "Transaksi berhasil diproses",
             "data": 
             {

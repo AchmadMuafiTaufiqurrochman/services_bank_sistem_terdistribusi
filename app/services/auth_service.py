@@ -68,7 +68,7 @@ async def register_user(db, data):
             "portofolio_id": account.portofolio_id,
         }
 
-        await send_to_middleware(payload, path="/api/v1/accounts/create")
+        await send_to_middleware(payload, path="/api/v1/portofolio/create")
 
         await db.commit()
     except HTTPException:
@@ -78,7 +78,7 @@ async def register_user(db, data):
         await db.rollback()
         raise
 
-    return {"message": "Registrasi berhasil!"}
+    return {"message": "Registrasi berhasil!", "status": "success"}
 
 async def login_user(user, db):
     """
@@ -95,9 +95,12 @@ async def login_user(user, db):
     portofolio = await repo.get_portofolio_by_customer_id(customer.customer_id)
 
     return {
+        "status": "success",
         "message": "Login berhasil!",
+        "data": {
+            "credential": {
         "username": user.username,
-        "password": user.password_plain,
+        "password": user.password_plain, },
         "customer": {
             "full_name": customer.full_name,
             "email": customer.email,
@@ -106,6 +109,5 @@ async def login_user(user, db):
             "account_number": portofolio.account_number if portofolio else None,
             "status": portofolio.status.value if portofolio else None
         }
+        }
     }
-
-

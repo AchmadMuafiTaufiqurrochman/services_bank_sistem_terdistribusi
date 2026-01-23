@@ -34,4 +34,3 @@ class Transaction(Base):
 
     # Relationships
     source_account = relationship("PortofolioAccount", back_populates="transactions")
-    mutations = relationship("Mutation", back_populates="transaction")

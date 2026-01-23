@@ -26,5 +26,5 @@ class Customer(Base):
         "PortofolioAccount",
         back_populates="customer",
         uselist=False,
-        foreign_keys="[PortofolioAccount.customer_id]"
+        foreign_keys="PortofolioAccount.customer_id"
     )

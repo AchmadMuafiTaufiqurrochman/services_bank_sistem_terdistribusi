@@ -31,4 +31,3 @@ class PortofolioAccount(Base):
         foreign_keys=[customer_id]
     )
     transactions = relationship("Transaction", back_populates="source_account")
-    mutations = relationship("Mutation", back_populates="account")

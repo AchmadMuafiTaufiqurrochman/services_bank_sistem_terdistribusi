@@ -46,4 +46,4 @@ else
 fi
 
 echo "[entrypoint] starting uvicorn"
-exec uvicorn app.main:app --host 0.0.0.0 --port 8000
+exec uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT:-8000}

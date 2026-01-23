@@ -8,6 +8,11 @@ class AccountsRepository:
         self.db = db
 
     async def get_account_by_number(self, account_number: str):
+        # print(f"DEBUG: get_account_by_number called with {account_number} (type: {type(account_number)})")
+        if not isinstance(account_number, str):
+             # print("DEBUG: account_number is not a string!")
+             return None
+             
         result = await self.db.execute(
             select(PortofolioAccount)
             .options(selectinload(PortofolioAccount.customer))

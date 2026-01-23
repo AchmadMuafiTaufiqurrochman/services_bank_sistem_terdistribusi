@@ -12,3 +12,30 @@ class RegisterRequest(BaseModel):
     username: str = Field(..., example="budisantoso")
     password: str = Field(..., example="securepassword123")
     PIN: str = Field(..., example="123456")
+
+class ResponseRegister(BaseModel):
+    status: str = Field(..., example="success", description="Status dari operasi registrasi")
+    message: str = Field(..., example="Registrasi berhasil", description="Pesan terkait hasil registrasi")
+
+class ResponseLogin(BaseModel):
+    status: str = Field(..., example="success", description="Status dari operasi login")
+    message: str = Field(..., example="Login berhasil", description="Pesan terkait hasil login")
+    data: dict = Field(...,
+    example= {
+        "status": "success",
+        "message": "Login berhasil!",
+        "data": {
+            "credential": {
+        "username": "budisantoso",
+        "password": "securepassword123", },
+        "customer": {
+            "full_name": "Budi Santoso",
+            "email": "budi.santoso@example.com",
+        },
+        "account": {
+            "account_number": "1234567890",
+            "status": "Active"
+        }
+        }
+    },
+     description="Data tambahan terkait login")

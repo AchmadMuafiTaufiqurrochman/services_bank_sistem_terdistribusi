@@ -42,8 +42,10 @@ RUN if [ -s /app/requirements.txt ]; then pip install --no-cache-dir -r /app/req
 # Ensure entrypoint is executable
 RUN chmod +x /app/scripts/docker-entrypoint.sh || true
 
-# Expose port
-EXPOSE 8000
+# Accept build argument for port (default 8000)
+ARG APP_PORT=8000
+# Expose port derived from argument
+EXPOSE ${APP_PORT}
 
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONPATH=/app

@@ -1,170 +1,144 @@
 # Services Backend - Sistem Bank Terdistribusi
 
-Dokumentasi singkat untuk layanan backend proyek "Services Backend".
+Dokumentasi untuk layanan backend proyek "Services Backend".
 
 ## Deskripsi
 
-Proyek ini adalah backend untuk sistem bank terdistribusi yang dibangun menggunakan FastAPI. Aplikasi menggunakan SQLAlchemy (asynchronous) dan aiomysql untuk koneksi database MySQL. Fokus saat ini mencakup fitur autentikasi (registrasi & login) dan model-model dasar nasabah, login, portofolio, dan transaksi.
+Proyek ini adalah backend untuk sistem bank terdistribusi yang dibangun menggunakan FastAPI. Aplikasi menggunakan SQLAlchemy (asynchronous) dan aiomysql untuk koneksi database MySQL. 
+
+Fokus saat ini mencakup:
+- **Autentikasi**: Registrasi & Login.
+- **Manajemen Akun**: Cek saldo, detail nasabah, mutasi, dan daftar transaksi.
+- **Transaksi**: Transfer sesama bank (Overbook), Transfer antar bank (Online), setor/tarik saldo.
+- **Middleware**: Validasi Token & PIN.
 
 ## Fitur utama
 
-- Registrasi pengguna (nasabah)
-- Login (melalui middleware verifikasi)
-- Struktur database memakai SQLAlchemy Async
-- Menggunakan environment variables untuk konfigurasi koneksi database
+- **Autentikasi Pengguna**: Registrasi nasabah dan login dengan enkripsi bcrypt.
+- **Manajemen Portofolio**: 
+    - Cek Saldo & Detail Akun.
+    - Riwayat Transaksi (Transaction List) & Mutasi.
+- **Transaksi Finansial**:
+    - **Overbook (Sesama Bank)**: Transfer internal antar rekening.
+    - **Online (Antar Bank)**: Transfer eksternal (placeholder logic).
+    - **Deposit & Withdraw**: Setor dan tarik dana via API.
+- **Validasi Keamanan**:
+    - Middleware verifikasi Auth (Login).
+    - Middleware verifikasi PIN (untuk transaksi finansial).
+- **Integrasi Middleware Eksternal**: Mengirim notifikasi transaksi ke service middleware lain.
+- **Deployment Docker**: Dukungan penuh untuk deployment menggunakan Docker & Docker Compose.
 
 ## Teknologi & Dependensi
 
-Beberapa paket penting (lihat `requirements.txt` untuk daftar lengkap):
-
 - Python 3.11+
-- FastAPI
-- Uvicorn
-- SQLAlchemy (async)
-- aiomysql / PyMySQL
-- passlib (bcrypt)
-- python-dotenv
+- FastAPI & Uvicorn (Server)
+- SQLAlchemy (Async ORM)
+- aiomysql (MySQL Driver)
+- Docker & Docker Compose
+- Alembic (Database Migrations)
 
 ## Persyaratan (Prasyarat)
 
-- MySQL / MariaDB yang dapat diakses dari aplikasi
+- Docker Desktop (jika menggunakan Docker)
+- MySQL / MariaDB (jika berjalan manual)
 - Python 3.11+
-- Virtual environment (direkomendasikan)
 
-## Instalasi (Windows PowerShell)
+## Cara Menjalankan (Docker - Direkomendasikan)
 
-1. Buat dan aktifkan virtual environment (opsional tapi direkomendasikan):
+Pastikan file `.env` sudah dikonfigurasi (lihat contoh di bawah).
 
-```powershell
-python -m venv env ; .\env\Scripts\Activate.ps1
-```
+1. **Jalankan container**:
+   ```bash
+   docker network create minibank-network
+   docker-compose up --build -d
+   ```
+2. **Cek status**:
+   ```bash
+   docker-compose ps
+   ```
+3. **Akses API**:
+   - URL: http://localhost:8000
+   - Swagger Docs: http://localhost:8000/docs
+
+## Cara Menjalankan (Manual)
+
+1. Buat dan aktifkan virtual environment:
+   ```powershell
+   python -m venv env ; .\env\Scripts\Activate.ps1
+   # Atau di Linux/Mac: source env/bin/activate
+   ```
 
 2. Install dependensi:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-```powershell
-pip install -r requirements.txt
-```
+3. Setup Database:
+   - Pastikan MySQL berjalan.
+   - Buat database sesuai config `.env`.
+   - Jalankan migrasi: `alembic upgrade head`
 
-3. Buat file `.env` di root proyek dan isi variabel berikut:
+4. Jalankan Server:
+   ```bash
+   python run_server.py
+   # Atau: uvicorn app.main:app --reload
+   ```
 
-- DB_HOST
-- DB_USER
-- DB_PASSWORD
-- DB_NAME
-- DB_PORT
+## Konfigurasi Environment (.env)
 
-Contoh `.env` (jangan commit file ini ke VCS):
+Copy .env.example dan buat file `.env` di root folder:
 
-```
-DB_HOST=127.0.0.1
-DB_USER=root
-DB_PASSWORD=rahasia
-DB_NAME=services_db
-DB_PORT=3306
-```
 
-## Menjalankan aplikasi
 
-Jalankan server pengembangan dengan Uvicorn:
-
-```powershell
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-API akan tersedia di `http://localhost:8000` dan dokumentasi interaktif OpenAPI di `http://localhost:8000/docs`.
-
-## Endpoints (ringkasan)
-
-Semua endpoint dikelompokkan di bawah prefix `/api/v1`.
-
-- POST /api/v1/auth/register
-  - Registrasi nasabah baru
-  - Payload (contoh, JSON):
-
-```json
-{
-  "full_name": "Budi Santoso",
-  "birth_date": "1990-01-01",
-  "address": "Jl. Contoh No.1",
-  "nik": "3201012304950007",
-  "phone_number": "08123456789",
-  "email": "budi@example.com",
-  "username": "budi",
-  "password": "rahasia123",
-  "PIN": "1234"
-}
-```
-
-- POST /api/v1/auth/login
-  - Login menggunakan middleware `verify_auth` (implementasi verifikasi berada di `app/middleware/auth_middleware.py`)
-
-Catatan: Lihat skema Pydantic `app/schemas/auth_schema.py` untuk detail field.
-
-## Konfigurasi Database
-
-- Koneksi database dibuat di `app/db/database.py` sebagai asynchronous engine menggunakan `aiomysql`.
-- URL koneksi terbentuk dari variabel environment yang diambil melalui `python-dotenv` (`app/core/config.py`).
-
-## Struktur proyek (ringkas)
-
-Berikut struktur utama proyek:
+## Struktur Proyek Utama
 
 ```
-README.md
-requirements.txt
 app/
-  main.py              # entrypoint FastAPI
-  core/
-    config.py          # pembacaan .env
-    logging.py
-  db/
-    database.py        # engine async + dependency get_db
-    models/            # model-model SQLAlchemy (Customer, Login, Portofolio, Transaction, ...)
-  middleware/
-    auth_middleware.py
-  repositories/
-    auth_repository.py
-  routes/
-    v1/
-      auth_router.py
-  schemas/
-    auth_schema.py
-  services/
-    auth_service.py
-test/
-  test_connection.py   # skrip kecil untuk verifikasi koneksi DB
+├── core/
+│   ├── config.py             # Konfigurasi Environment & DB URI
+│   ├── exception_handler.py  # Global Exception Handling
+│   └── logging.py            # Konfigurasi Logger
+├── db/
+│   ├── models/               # Definisi Tabel Database (ORM)
+│   │   ├── customer_model.py
+│   │   ├── login_model.py 
+│   │   ├── portofolio_model.py
+│   │   └── transaction_model.py
+│   └── database.py           # Config Async Engine & Session
+├── middleware/
+│   ├── auth_middleware.py    # Middleware Validasi Token Login
+│   └── pin_middleware.py     # Middleware Validasi PIN
+├── repositories/             # Data Access Layer (CRUD Operation)
+│   ├── accounts_repository.py
+│   ├── auth_repository.py
+│   └── transaction_repository.py
+├── routes/
+│   └── v1/                   # Endpoints API Version 1
+│       ├── accounts_router.py
+│       ├── auth_router.py
+│       └── transaction_router.py
+├── schemas/                  # Pydantic Schemas (Validasi Request/Response)
+│   ├── accounts_schema.py
+│   ├── add_balance_schema.py
+│   ├── auth_schema.py
+│   ├── online_schema.py
+│   └── overbook_schema.py
+├── services/                 # Business Logic Layer
+│   ├── accounts_service.py
+│   ├── auth_service.py
+│   ├── online_service.py
+│   └── overbook_service.py
+├── utils/                    # Utilities & Helper
+│   ├── request_middleware.py # Helper HTTP Request ke Ext Service
+│   └── wrapper_response.py   # Standardisasi Response API
+└── main.py                   # Entry Point Aplikasi FastAPI
 ```
 
-## Testing (cek koneksi DB cepat)
+## Troubleshooting
 
-Ada skrip sederhana untuk menguji koneksi database: `test/test_connection.py`.
-
-Jalankan dari PowerShell (pastikan environment aktif dan `.env` sudah terisi):
-
-```powershell
-python.exe -m test.test_connection
-```
-
-Output akan menampilkan apakah koneksi berhasil atau gagal.
-
-## Catatan pengembangan
-
-- Password di-hash menggunakan `passlib` dengan algoritma bcrypt (di `app/services/auth_service.py`).
-- Pastikan password yang dikirimkan tidak lebih dari 72 byte (pemeriksaan ada di service).
-- File `app/core/logging.py` ada tetapi kosong — Anda bisa menambahkan konfigurasi logging sesuai kebutuhan.
-
-## Kontribusi
-
-Jika ingin berkontribusi, silakan fork repo, buat branch fitur, dan kirim PR. Sertakan deskripsi perubahan dan jika mengubah skema DB, tambahkan migrasi atau instruksi terkait.
-
-## Lisensi
-
-Tambahkan file `LICENSE` jika ingin menentukan lisensi. Saat ini tidak ada lisensi eksplisit di repo.
-
-## Kontak
-
-Jika butuh bantuan lebih lanjut atau ingin diskusi desain, tambahkan issue di repository.
+- **Error 404 pada Transaction List**: Pastikan user memiliki akun di tabel `portofolio_accounts` dan `start_date`/`end_date` valid.
+- **Error Middleware 422**: Payload transaksi mungkin kurang lengkap. Service otomatis melengkapi `transaction_type`, `transaction_bank`, dll sebelum kirim ke middleware.
+- **Database Connection Error di Docker**: Pastikan `DB_HOST=db` (nama service di docker-compose), bukan `localhost`.
 
 ---
-
-Dokumentasi ini dibuat otomatis berdasarkan sumber di folder `app/`. Perlu penambahan detail (contoh: contoh response, autentikasi token, migrasi DB) bila fitur baru ditambahkan.
+Made with ❤️ by Choco_Mette

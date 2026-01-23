@@ -4,6 +4,7 @@ from app.db.models import Transaction
 from app.utils.request_middleware import send_to_middleware
 from datetime import datetime
 from app.repositories.transaction_repository import TransactionRepository
+from app.middleware.pin_middleware import validate_pin
 
 class OnlineService:
     def __init__(self, db):
@@ -23,12 +24,7 @@ class OnlineService:
             )
 
         # 2. Validasi PIN
-        customer_pin = await self.transaction_repository.get_customer_pin(user.customer_id)
-        if customer_pin != online_data.PIN:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="PIN salah."
-            )
+        await validate_pin(online_data.PIN, user.customer_id, self.db)
 
         # 3. Buat Object Transaction & Flush (Dapatkan ID)
         transaction = Transaction(
@@ -52,7 +48,7 @@ class OnlineService:
             payload["transaction_id"] = transaction.transaction_id  # Sisipkan ID untuk konsistensi
             
             # 5. Kirim ke middleware
-            await send_to_middleware(payload, path="/api/v1/transactions/external/execute")
+            await send_to_middleware(payload, path="/api/v1/transaction/external/execute")
 
             # Update balances
             await self.transaction_repository.update_balance(online_data.source_account_number, -online_data.amount)
@@ -68,6 +64,7 @@ class OnlineService:
             raise HTTPException(status_code=500, detail=f"Transaksi gagal: {str(e)}")
             
         return {
+            "status": "success",
             "message": "Transaksi berhasil diproses",
             "data": 
             {
@@ -80,5 +77,5 @@ class OnlineService:
                 "bank_reference": transaction.bank_reference,
                 "currency_code": "IDR",
                 "transaction_date": transaction.transaction_date.isoformat()
-                }
+            }
         }

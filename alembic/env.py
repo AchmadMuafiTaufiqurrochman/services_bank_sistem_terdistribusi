@@ -5,7 +5,7 @@ import configparser
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
-from app.db.models import customer_model, login_model, mutation_model, portofolio_model, transaction_model
+from app.db.models import customer_model, login_model, portofolio_model, transaction_model
 
 from app.db.database import Base
 from app.core.config import settings

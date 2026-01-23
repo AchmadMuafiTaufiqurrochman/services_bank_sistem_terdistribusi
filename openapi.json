@@ -1,0 +1,945 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Services Backend",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "parameters": [
+          {
+            "name": "Authorization-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Username"
+            }
+          },
+          {
+            "name": "Authorization-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Password"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/balance": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get Balance",
+        "operationId": "get_balance_api_v1_accounts_balance_get",
+        "parameters": [
+          {
+            "name": "Authorization-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Username"
+            }
+          },
+          {
+            "name": "Authorization-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Password"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/detail": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get Customer Detail",
+        "operationId": "get_customer_detail_api_v1_accounts_detail_get",
+        "parameters": [
+          {
+            "name": "Authorization-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Username"
+            }
+          },
+          {
+            "name": "Authorization-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Password"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/mutationlist": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get Mutation List",
+        "operationId": "get_mutation_list_api_v1_accounts_mutationlist_get",
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start Date"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End Date"
+            }
+          },
+          {
+            "name": "PIN",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 6,
+              "maxLength": 6,
+              "title": "Pin"
+            }
+          },
+          {
+            "name": "Authorization-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Username"
+            }
+          },
+          {
+            "name": "Authorization-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Password"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/transactionlist": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get Transaction List",
+        "operationId": "get_transaction_list_api_v1_accounts_transactionlist_get",
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start Date"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End Date"
+            }
+          },
+          {
+            "name": "PIN",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 6,
+              "maxLength": 6,
+              "title": "Pin"
+            }
+          },
+          {
+            "name": "Authorization-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Username"
+            }
+          },
+          {
+            "name": "Authorization-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Password"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transaction/overbook": {
+      "post": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Overbook Transaction",
+        "operationId": "overbook_transaction_api_v1_transaction_overbook_post",
+        "parameters": [
+          {
+            "name": "Authorization-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Username"
+            }
+          },
+          {
+            "name": "Authorization-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Password"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OverbookSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transaction/online": {
+      "post": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Online Transaction",
+        "operationId": "online_transaction_api_v1_transaction_online_post",
+        "parameters": [
+          {
+            "name": "Authorization-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Username"
+            }
+          },
+          {
+            "name": "Authorization-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Password"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnlineSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transaction/balance/deposit": {
+      "post": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Add Balance",
+        "operationId": "add_balance_api_v1_transaction_balance_deposit_post",
+        "parameters": [
+          {
+            "name": "Authorization-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Username"
+            }
+          },
+          {
+            "name": "Authorization-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Password"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddBalanceSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transaction/balance/withdraw": {
+      "post": {
+        "tags": [
+          "Transaction"
+        ],
+        "summary": "Withdraw Balance",
+        "operationId": "withdraw_balance_api_v1_transaction_balance_withdraw_post",
+        "parameters": [
+          {
+            "name": "Authorization-Username",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Username"
+            }
+          },
+          {
+            "name": "Authorization-Password",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Authorization-Password"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddBalanceSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Read Root",
+        "operationId": "read_root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddBalanceSchema": {
+        "properties": {
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "title": "Amount",
+            "description": "Jumlah saldo yang ingin ditambahkan",
+            "example": 100000
+          },
+          "PIN": {
+            "type": "string",
+            "maxLength": 6,
+            "minLength": 6,
+            "title": "Pin",
+            "description": "PIN nasabah untuk verifikasi",
+            "example": "123456"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "PIN"
+        ],
+        "title": "AddBalanceSchema"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "OnlineSchema": {
+        "properties": {
+          "transaction_type": {
+            "type": "string",
+            "title": "Transaction Type",
+            "description": "Tipe transaksi",
+            "example": "TrfOvrbok"
+          },
+          "transaction_bank": {
+            "type": "string",
+            "title": "Transaction Bank",
+            "description": "Tipe Transaksi",
+            "example": "Internal"
+          },
+          "bank_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bank Reference",
+            "description": "Referensi bank eksternal",
+            "example": "Bank Samiun"
+          },
+          "source_account_number": {
+            "type": "string",
+            "title": "Source Account Number",
+            "description": "Nomor rekening sumber",
+            "example": "1234567890"
+          },
+          "target_account_number": {
+            "type": "string",
+            "title": "Target Account Number",
+            "description": "Nomor rekening tujuan",
+            "example": "0987654321"
+          },
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "title": "Amount",
+            "description": "Jumlah yang akan ditransfer",
+            "example": 100000
+          },
+          "currency_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency Code",
+            "description": "Kode mata uang",
+            "default": "IDR",
+            "example": "IDR"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Deskripsi transaksi",
+            "example": "Ini Deskripsi"
+          },
+          "PIN": {
+            "type": "string",
+            "title": "Pin",
+            "description": "PIN",
+            "example": 123456
+          }
+        },
+        "type": "object",
+        "required": [
+          "transaction_type",
+          "transaction_bank",
+          "bank_reference",
+          "source_account_number",
+          "target_account_number",
+          "amount",
+          "PIN"
+        ],
+        "title": "OnlineSchema"
+      },
+      "OverbookSchema": {
+        "properties": {
+          "bank_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bank Reference",
+            "description": "Referensi bank eksternal",
+            "example": "Bank Samiun"
+          },
+          "target_account_number": {
+            "type": "string",
+            "title": "Target Account Number",
+            "description": "Nomor rekening tujuan",
+            "example": "0987654321"
+          },
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "title": "Amount",
+            "description": "Jumlah yang akan ditransfer",
+            "example": 100000
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Deskripsi transaksi",
+            "example": "Ini Deskripsi"
+          },
+          "PIN": {
+            "type": "string",
+            "title": "Pin",
+            "description": "PIN",
+            "example": 123456
+          }
+        },
+        "type": "object",
+        "required": [
+          "bank_reference",
+          "target_account_number",
+          "amount",
+          "PIN"
+        ],
+        "title": "OverbookSchema"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "title": "Full Name",
+            "example": "Budi Santoso"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Birth Date",
+            "example": "1990-04-23"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "example": "Jl. Merdeka No. 10, Jakarta"
+          },
+          "nik": {
+            "type": "string",
+            "title": "Nik",
+            "example": "3201012304950007"
+          },
+          "phone_number": {
+            "type": "string",
+            "title": "Phone Number",
+            "example": "6281234567890"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "example": "budi.santoso@example.com"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "example": "budisantoso"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "example": "securepassword123"
+          },
+          "PIN": {
+            "type": "string",
+            "title": "Pin",
+            "example": "123456"
+          }
+        },
+        "type": "object",
+        "required": [
+          "full_name",
+          "birth_date",
+          "address",
+          "nik",
+          "phone_number",
+          "email",
+          "username",
+          "password",
+          "PIN"
+        ],
+        "title": "RegisterRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
