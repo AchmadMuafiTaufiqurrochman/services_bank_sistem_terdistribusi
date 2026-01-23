@@ -24,7 +24,7 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
+  app-service:
     build:
       context: .
       args:

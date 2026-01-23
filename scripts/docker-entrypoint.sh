@@ -35,15 +35,7 @@ done
 if [ "$wait_ok" -ne 1 ]; then
   echo "[entrypoint] continuing even though DB wait timed out"
 fi
-
-# Run manual migration script if present
-if [ -f /app/app/schemas/migration.py ]; then
-  echo "[entrypoint] running manual migration script: app/schemas/migration.py"
-  # use python to run the migration script
-  python -u /app/app/schemas/migration.py || echo "[entrypoint] migration script failed (continuing)"
-else
-  echo "[entrypoint] manual migration script not found; skipping"
-fi
-
+echo "[entrypoint] starting migrations..."
+alembic upgrade head
 echo "[entrypoint] starting uvicorn"
 exec uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT:-8000}
